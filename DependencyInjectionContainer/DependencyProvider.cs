@@ -59,7 +59,9 @@ namespace DependencyInjectionContainer
             }
 
 
-            return null;
+            object obj = GetImplementation(infos[0], t);
+            _recursionStackResolver.Pop();
+            return obj;
         }
 
         public TDependency Resolve<TDependency>()

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DependencyInjectionContainer
 {
-    class ImplementationInfo
+    public class ImplementationInfo
     {
         public Type ImplementClassType;
         public LifeTime LifeTime;
