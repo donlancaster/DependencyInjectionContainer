@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DependencyInjectionContainer
 {
-    class DependencyProvider
+   public class DependencyProvider
     {
         private readonly DependenciesConfiguration _configuration;
 
@@ -61,6 +61,12 @@ namespace DependencyInjectionContainer
 
             return null;
         }
+
+        public TDependency Resolve<TDependency>()
+        {
+            return (TDependency)Resolve(typeof(TDependency));
+        }
+
 
         private List<ImplementationInfo> GetImplementationsInfos(Type dependencyType)
         {

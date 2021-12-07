@@ -14,7 +14,7 @@ namespace DependencyInjectionContainer
     }
 
 
-    class DependenciesConfiguration
+   public class DependenciesConfiguration
     {
 
         public readonly Dictionary<Type, List<ImplementationInfo>> RegisteredDependencies;
