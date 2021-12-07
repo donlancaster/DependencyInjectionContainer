@@ -10,5 +10,12 @@ namespace DependencyInjectionContainer
     {
         public Type ImplementClassType;
         public LifeTime LifeTime;
+
+        public ImplementationInfo(LifeTime lifeTime, Type impl)
+        {
+            ImplementClassType = impl;
+            LifeTime = lifeTime;
+        }
+
     }
 }

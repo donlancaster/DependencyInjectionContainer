@@ -17,13 +17,16 @@ namespace DependencyInjectionContainer
     class DependenciesConfiguration
     {
 
-
-
         public readonly Dictionary<Type, List<ImplementationInfo>> RegisteredDependencies;
 
         public DependenciesConfiguration()
         {
             RegisteredDependencies = new Dictionary<Type, List<ImplementationInfo>>();
+        }
+
+        public void Register(Type interfaceType, Type classType, LifeTime lifeTime = LifeTime.InstancePerDependency)
+        {
+
         }
 
     }
