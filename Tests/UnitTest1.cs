@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DependencyInjectionContainer;
+using System.Collections.Generic;
 
 namespace Tests
 {
@@ -37,6 +38,18 @@ namespace Tests
         }
 
 
+        [TestMethod]
+        public void ManyImplementationsTest()
+        {
+            DependenciesConfiguration configuration = new DependenciesConfiguration();
+            configuration.Register<IService, FirstIServiceImpl>();
+            configuration.Register<IService, SecondIServiceImpl>();
+            DependencyProvider provider = new DependencyProvider(configuration);
+
+            IEnumerable<IService> impls = provider.Resolve<IEnumerable<IService>>();
+            Assert.IsNotNull(impls);
+            Assert.AreEqual(2, ((List<IService>)impls).Count);
+        }
 
 
 
