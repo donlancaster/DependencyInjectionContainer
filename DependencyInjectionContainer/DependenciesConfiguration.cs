@@ -24,8 +24,20 @@ namespace DependencyInjectionContainer
             RegisteredDependencies = new Dictionary<Type, List<ImplementationInfo>>();
         }
 
+        
+
         public void Register(Type interfaceType, Type classType, LifeTime lifeTime = LifeTime.InstancePerDependency)
         {
+            if (!RegisteredDependencies.ContainsKey(interfaceType))
+            {
+                List<ImplementationInfo> impl = new List<ImplementationInfo> { new ImplementationInfo(lifeTime, classType) };
+                RegisteredDependencies.Add(interfaceType, impl);
+            }
+            else
+            {
+                RegisteredDependencies[interfaceType].Add(new ImplementationInfo(lifeTime, classType));
+            }
+
 
         }
 
