@@ -103,38 +103,52 @@ namespace Tests
 
 
 
-
-
-
-
-
-        interface IAnother<T>
-    where T : ISmth
+        [TestMethod]
+        public void OneClassTest()
         {
+            DependenciesConfiguration configuration = new DependenciesConfiguration();
+            configuration.Register<HumanImpl, HumanImpl>();
+            DependencyProvider provider = new DependencyProvider(configuration);
+            HumanImpl humanImpl = provider.Resolve<HumanImpl>();
+            Assert.IsNotNull(humanImpl);
         }
 
-        class First<T> : IAnother<T>
-            where T : ISmth
-        {
-        }
 
-        interface IFoo<T>
-            where T : IService
-        {
-        }
 
-        class Second<T> : IFoo<T>
-            where T : IService
-        {
-        }
 
-        public interface IHuman
-        {
-        }
 
-        public class HumanImpl : IHuman
-        {
-        }
 
+
+
+
+    }
+
+
+    interface IAnother<T>
+where T : ISmth
+    {
+    }
+
+    class First<T> : IAnother<T>
+        where T : ISmth
+    {
+    }
+
+    interface IFoo<T>
+        where T : IService
+    {
+    }
+
+    class Second<T> : IFoo<T>
+        where T : IService
+    {
+    }
+
+    public interface IHuman
+    {
+    }
+
+    public class HumanImpl : IHuman
+    {
     }
 }
