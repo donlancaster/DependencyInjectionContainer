@@ -40,4 +40,47 @@ namespace Tests
 
 
 
+    interface IData
+    {
+    }
+
+    class IDataImpl : IData
+    {
+        public readonly IClient Cl;
+
+        public IDataImpl(IClient cl)
+        {
+            Cl = cl;
+        }
+    }
+
+
+
+    interface IClient
+    {
+    }
+
+    class FirstIClientImpl : IClient
+    {
+        public readonly IData Data;
+
+        public FirstIClientImpl(IData data)
+        {
+            Data = data;
+        }
+    }
+
+
+    class SecondIClientImpl : IClient
+    {
+        public readonly IEnumerable<IService> Serv;
+
+        public SecondIClientImpl(IEnumerable<IService> serv)
+        {
+            Serv = serv;
+        }
+    }
+
+
+
 }

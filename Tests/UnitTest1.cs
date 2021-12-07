@@ -52,6 +52,38 @@ namespace Tests
         }
 
 
+        [TestMethod]
+        public void InnerDependencyTest()
+        {
+            DependenciesConfiguration configuration = new DependenciesConfiguration();
+            configuration.Register<ISmth, ISmthImpl>();
+            configuration.Register<IService, FirstIServiceImpl>();
+            configuration.Register<IService, SecondIServiceImpl>();
+            configuration.Register<IClient, SecondIClientImpl>();
+            DependencyProvider provider = new DependencyProvider(configuration);
+
+            FirstIServiceImpl cl1 = (FirstIServiceImpl)provider.Resolve<IService>();
+            Assert.IsNotNull(cl1.Smth);
+
+            SecondIClientImpl cl2 = (SecondIClientImpl)provider.Resolve<IClient>();
+            Assert.IsNotNull(cl2.Serv);
+            Assert.AreEqual(2, ((List<IService>)cl2.Serv).Count);
+        }
+
+        [TestMethod]
+        public void SimpleRecursionTest()
+        {
+            DependenciesConfiguration configuration = new DependenciesConfiguration();
+            configuration.Register<IClient, FirstIClientImpl>();
+            configuration.Register<IData, IDataImpl>();
+            DependencyProvider provider = new DependencyProvider(configuration);
+
+            FirstIClientImpl client = (FirstIClientImpl)provider.Resolve<IClient>();
+            Assert.IsNull(((IDataImpl)client.Data).Cl);
+        }
+
+
+
 
     }
 }
