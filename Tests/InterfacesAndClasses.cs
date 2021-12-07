@@ -16,5 +16,28 @@ namespace Tests
     }
 
 
+    interface IService
+    {
+    }
+
+    class FirstIServiceImpl : IService
+    {
+        public readonly ISmth Smth;
+
+        public FirstIServiceImpl()
+        {
+        }
+
+        public FirstIServiceImpl(ISmth smth)
+        {
+            Smth = smth;
+        }
+    }
+
+    class SecondIServiceImpl : IService
+    {
+    }
+
+
 
 }
