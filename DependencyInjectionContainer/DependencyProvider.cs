@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -113,9 +114,54 @@ namespace DependencyInjectionContainer
             return CreateInstanceForDependency(implementInfo.ImplementClassType, innerTypeForOpenGeneric);
         }
 
-        private object CreateInstanceForDependency(Type implClassType, Type innerTypeForOpenGeneric)
+        private object CreateInstanceForDependency(Type implementClassType, Type innerTypeForOpenGeneric)
         {
-            return null;
+            ConstructorInfo[] constructors = implementClassType.GetConstructors()
+                 .OrderByDescending(x => x.GetParameters().Length).ToArray();
+            object implInstance = null;
+            foreach (ConstructorInfo constructor in constructors)
+            {
+                ParameterInfo[] parameters = constructor.GetParameters();
+                List<object> paramsValues = new List<object>();
+                foreach (ParameterInfo parameter in parameters)
+                {
+                    if (IsDependency(parameter.ParameterType))
+                    {
+                        object obj = Resolve(parameter.ParameterType);
+                        paramsValues.Add(obj);
+                    }
+                    else
+                    {
+                        object obj = null;
+                        try
+                        {
+                            obj = Activator.CreateInstance(parameter.ParameterType, null);
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
+
+                        paramsValues.Add(obj);
+                    }
+                }
+
+                try
+                {
+                    if (innerTypeForOpenGeneric != null)
+                        implementClassType = implementClassType.MakeGenericType(innerTypeForOpenGeneric);
+                    implInstance = Activator.CreateInstance(implementClassType, paramsValues.ToArray());
+                    break;
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
+            return implInstance;
+
+
         }
 
 
@@ -123,7 +169,15 @@ namespace DependencyInjectionContainer
 
         private object ConvertToIEnumerable(List<object> implementations, Type t)
         {
-            return null;
+            var enumerableType = typeof(Enumerable);
+            var castMethod = enumerableType.GetMethod(nameof(Enumerable.Cast))?.MakeGenericMethod(t);
+            var toListMethod = enumerableType.GetMethod(nameof(Enumerable.ToList))?.MakeGenericMethod(t);
+
+            IEnumerable<object> itemsToCast = implementations;
+
+            var castedItems = castMethod?.Invoke(null, new[] { itemsToCast });
+
+            return toListMethod?.Invoke(null, new[] { castedItems });
         }
 
 
