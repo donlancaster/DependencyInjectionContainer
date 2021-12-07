@@ -12,7 +12,7 @@ namespace Tests
         {
             //ismth
             DependenciesConfiguration configuration = new DependenciesConfiguration();
-           
+
             configuration.Register<ISmth, ISmthImpl>(LifeTime.Singleton);
             DependencyProvider provider = new DependencyProvider(configuration);
 
@@ -83,7 +83,58 @@ namespace Tests
         }
 
 
+        [TestMethod]
+        public void SimpleOpenGenericTest()
+        {
+            DependenciesConfiguration configuration = new DependenciesConfiguration();
+            configuration.Register<IAnother<ISmth>, First<ISmth>>();
+            configuration.Register(typeof(IFoo<>), typeof(Second<>));
+            DependencyProvider provider = new DependencyProvider(configuration);
 
+            IAnother<ISmth> cl1 = provider.Resolve<IAnother<ISmth>>();
+            Assert.IsNotNull(cl1);
+
+            IFoo<IService> cl2 = provider.Resolve<IFoo<IService>>();
+            Assert.IsNotNull(cl2);
+        }
+
+
+
+
+
+
+
+
+
+
+
+        interface IAnother<T>
+    where T : ISmth
+        {
+        }
+
+        class First<T> : IAnother<T>
+            where T : ISmth
+        {
+        }
+
+        interface IFoo<T>
+            where T : IService
+        {
+        }
+
+        class Second<T> : IFoo<T>
+            where T : IService
+        {
+        }
+
+        public interface IHuman
+        {
+        }
+
+        public class HumanImpl : IHuman
+        {
+        }
 
     }
 }
