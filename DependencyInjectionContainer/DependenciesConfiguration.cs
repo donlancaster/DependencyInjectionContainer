@@ -45,5 +45,13 @@ namespace DependencyInjectionContainer
 
         }
 
+
+
+        public void Register<TDependency, TImplementation>(LifeTime lifeTime = LifeTime.InstancePerDependency)
+        {
+            Register(typeof(TDependency), typeof(TImplementation), lifeTime);
+        }
+
+
     }
 }

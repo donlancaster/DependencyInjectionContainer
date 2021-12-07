@@ -15,5 +15,20 @@ namespace DependencyInjectionContainer
           new ConcurrentDictionary<Type, object>();
 
 
+
+
+        private readonly Stack<Type> _recursionStackResolver = new Stack<Type>();
+
+        public DependencyProvider(DependenciesConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+
+        private object Resolve(Type t)
+        {
+            return null;
+        }
+
     }
 }
