@@ -5,26 +5,50 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Moq;
 
 namespace DependencyInjectionContainer
 {
-   public class DependencyProvider
+    public class DependencyProvider
     {
         private readonly DependenciesConfiguration _configuration;
 
-        private readonly ConcurrentDictionary<Type, object> _singletonImplementations =
-          new ConcurrentDictionary<Type, object>();
-
+        public readonly ConcurrentDictionary<Type, object> _singletonImplementations = new ConcurrentDictionary<Type, object>();
 
 
 
         private readonly Stack<Type> _recursionStackResolver = new Stack<Type>();
+
+        //
+
+        public List<object> mocked = new List<object>();
+
+
 
         public DependencyProvider(DependenciesConfiguration configuration)
         {
             _configuration = configuration;
         }
 
+
+        public TDependency Resolve<TDependency>()
+        {
+            return (TDependency)Resolve(typeof(TDependency));
+        }
+
+        public TDependency ResolveMocked<TDependency>()
+        {
+            return (TDependency)ResolveMocked(typeof(TDependency));
+        }
+
+        private object ResolveMocked(Type type)
+        {
+            List<ImplementationInfo> infos = GetImplementationsInfos(type);
+
+            object obj = GetImplementation(infos[0], type);
+            return obj;
+
+        }
 
         private object Resolve(Type t)
         {
@@ -36,14 +60,24 @@ namespace DependencyInjectionContainer
                 throw new Exception("Unregistered dependency");
 
 
+
             if (_recursionStackResolver.Contains(t))
+            {
+
                 return null;
+
+            }
 
             _recursionStackResolver.Push(t);
 
             if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
             {
+
+
                 dependencyType = t.GetGenericArguments()[0];
+
+
+
                 infos = GetImplementationsInfos(dependencyType);
                 if (infos == null) throw new Exception("Unregistered dependency");
                 List<object> implementations = new List<object>();
@@ -60,14 +94,11 @@ namespace DependencyInjectionContainer
 
 
             object obj = GetImplementation(infos[0], t);
+
             _recursionStackResolver.Pop();
             return obj;
         }
 
-        public TDependency Resolve<TDependency>()
-        {
-            return (TDependency)Resolve(typeof(TDependency));
-        }
 
 
         private List<ImplementationInfo> GetImplementationsInfos(Type dependencyType)
@@ -81,11 +112,13 @@ namespace DependencyInjectionContainer
 
 
             Type definition = dependencyType.GetGenericTypeDefinition();
+
             return _configuration.RegisteredDependencies.ContainsKey(definition)
                 ? _configuration.RegisteredDependencies[definition]
                 : null;
 
         }
+
 
 
 
@@ -103,15 +136,18 @@ namespace DependencyInjectionContainer
 
         private object GetImplementation(ImplementationInfo implementInfo, Type resolvingDependencyType)
         {
+            //если class<T>, это genericTypeDefinition
+            //если class<int>, это genericType 
             Type innerTypeForOpenGeneric = null;
             if (implementInfo.ImplementClassType.IsGenericType && implementInfo.ImplementClassType.IsGenericTypeDefinition &&
                 implementInfo.ImplementClassType.GetGenericArguments()[0].FullName == null)
-                innerTypeForOpenGeneric = resolvingDependencyType.GetGenericArguments().FirstOrDefault();
-
+                innerTypeForOpenGeneric = resolvingDependencyType.GetGenericArguments().FirstOrDefault(); //getGenericTypeAdgs[0]
+            //
             if (implementInfo.LifeTime == LifeTime.Singleton)
             {
                 if (!_singletonImplementations.ContainsKey(implementInfo.ImplementClassType))
                 {
+
                     object singleton = CreateInstanceForDependency(implementInfo.ImplementClassType, innerTypeForOpenGeneric);
                     _singletonImplementations.TryAdd(implementInfo.ImplementClassType, singleton);
                 }
@@ -121,7 +157,7 @@ namespace DependencyInjectionContainer
 
             return CreateInstanceForDependency(implementInfo.ImplementClassType, innerTypeForOpenGeneric);
         }
-
+        //List<List<List<int>>>
         private object CreateInstanceForDependency(Type implementClassType, Type innerTypeForOpenGeneric)
         {
             ConstructorInfo[] constructors = implementClassType.GetConstructors()
@@ -135,7 +171,15 @@ namespace DependencyInjectionContainer
                 {
                     if (IsDependency(parameter.ParameterType))
                     {
+                        //нашел А
                         object obj = Resolve(parameter.ParameterType);
+                        if (obj == null)
+                        {
+                            var mockA = new Mock<IA>();
+                            obj = mockA.Object;
+                           // mocked.Add(obj);
+
+                        }
                         paramsValues.Add(obj);
                     }
                     else
@@ -157,7 +201,9 @@ namespace DependencyInjectionContainer
                 try
                 {
                     if (innerTypeForOpenGeneric != null)
+                        //<T>
                         implementClassType = implementClassType.MakeGenericType(innerTypeForOpenGeneric);
+                    //Console.WriteLine(innerTypeForOpenGeneric.ToString());
                     implInstance = Activator.CreateInstance(implementClassType, paramsValues.ToArray());
                     break;
                 }
@@ -171,6 +217,7 @@ namespace DependencyInjectionContainer
 
 
         }
+
 
 
 

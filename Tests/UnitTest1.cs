@@ -1,6 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DependencyInjectionContainer;
 using System.Collections.Generic;
+using System.Threading;
+using System.Collections.Concurrent;
 
 namespace Tests
 {
@@ -104,7 +106,7 @@ namespace Tests
 
 
         [TestMethod]
-        public void OneClassTest()
+        public void SameClassTest()
         {
             DependenciesConfiguration configuration = new DependenciesConfiguration();
             configuration.Register<HumanImpl, HumanImpl>();
@@ -112,6 +114,15 @@ namespace Tests
             HumanImpl humanImpl = provider.Resolve<HumanImpl>();
             Assert.IsNotNull(humanImpl);
         }
+     }
+
+
+
+
+
+
+
+   
 
 
 
@@ -121,7 +132,8 @@ namespace Tests
 
 
 
-    }
+
+
 
 
     interface IAnother<T>

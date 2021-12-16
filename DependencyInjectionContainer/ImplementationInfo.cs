@@ -10,11 +10,13 @@ namespace DependencyInjectionContainer
     {
         public Type ImplementClassType;
         public LifeTime LifeTime;
+        public bool isNullParam;
 
         public ImplementationInfo(LifeTime lifeTime, Type impl)
         {
             ImplementClassType = impl;
             LifeTime = lifeTime;
+            isNullParam = false;
         }
 
     }

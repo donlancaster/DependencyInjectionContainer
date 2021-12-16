@@ -12,8 +12,7 @@ namespace DependencyInjectionContainer
     {
         Singleton, InstancePerDependency
     }
-    //особенность container -управление жизненным циклом
-    // А зависит от В
+
 
    public class DependenciesConfiguration
     {
