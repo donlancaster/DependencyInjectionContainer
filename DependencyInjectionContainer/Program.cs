@@ -11,24 +11,15 @@ namespace DependencyInjectionContainer
 
         static void Main(string[] args)
         {
-
             var config = new DependenciesConfiguration();
             config.Register<IA, A>(LifeTime.Singleton);
             config.Register<IB, B>(LifeTime.Singleton);
 
             DependencyProvider provider = new DependencyProvider(config);
 
-
             B b = (B)provider.Resolve<IB>();
 
-            
-
             b.a = (A)provider.Resolve<IA>();
-
-       
-
-
-
 
             //B
             Console.WriteLine("=== obejct B ===");
@@ -39,19 +30,14 @@ namespace DependencyInjectionContainer
                 Console.WriteLine("value = " + propertyInfosB[i].GetValue(b));
             }
 
-
             //A
             Console.WriteLine("\n\n=== object A ===");
-
             PropertyInfo[] propertyInfosA = b.a.GetType().GetProperties();
             for (int i = 0; i < propertyInfosA.Length; i++)
             {
                 Console.WriteLine("fieldName: " + propertyInfosA[i].Name + " | fieldType: " + propertyInfosA[i].PropertyType);
                 Console.WriteLine("value = " + propertyInfosA[i].GetValue(b.a));
             }
-
-
-
         }
     }
 }
@@ -77,16 +63,12 @@ namespace DependencyInjectionContainer
 
     public interface IA
     {
-        //   public void setB(IB b);
-
+ 
     }
 
     public class A : IA
     {
         private int valll;
-
-
-
         public IB b { get; set; }
         public A(IB ib, int val)
         {
