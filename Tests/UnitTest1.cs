@@ -3,6 +3,7 @@ using DependencyInjectionContainer;
 using System.Collections.Generic;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Tests
 {
@@ -114,53 +115,43 @@ namespace Tests
             HumanImpl humanImpl = provider.Resolve<HumanImpl>();
             Assert.IsNotNull(humanImpl);
         }
-     }
 
 
 
 
+        [TestMethod]
+        public void AtoBtoATest()
+        {
+            var config = new DependenciesConfiguration();
+            config.Register<IA, A>(LifeTime.Singleton);
+            config.Register<IB, B>(LifeTime.Singleton);
+            DependencyProvider provider = new DependencyProvider(config);
+            B b = (B)provider.Resolve<IB>();
+            Assert.IsNotNull(b);
+            PropertyInfo[] propertyInfos = b.a.GetType().GetProperties();
+            Assert.IsTrue(propertyInfos[0].GetValue(b.a).ToString().Contains("Mock"), b.a.ToString());
+            b.a = (A)provider.Resolve<IA>();
+            Assert.IsNotNull(b.a, b.GetType() + " " + b.a.GetType());
+            propertyInfos = b.a.GetType().GetProperties();
+            Assert.IsFalse(propertyInfos[0].GetValue(b.a).ToString().Contains("Mock"));
 
-
-
-   
-
-
-
-
-
-
-
-
-
-
-
-
-
-    interface IAnother<T>
-where T : ISmth
-    {
+        }
     }
 
-    class First<T> : IAnother<T>
-        where T : ISmth
-    {
-    }
-
-    interface IFoo<T>
-        where T : IService
-    {
-    }
-
-    class Second<T> : IFoo<T>
-        where T : IService
-    {
-    }
-
-    public interface IHuman
-    {
-    }
-
-    public class HumanImpl : IHuman
-    {
-    }
 }
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+  

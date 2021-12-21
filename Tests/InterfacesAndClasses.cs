@@ -6,8 +6,36 @@ using System.Threading.Tasks;
 
 namespace Tests
 {
+    interface IAnother<T>
+where T : ISmth
+    {
+    }
 
-    interface ISmth
+    class First<T> : IAnother<T>
+        where T : ISmth
+    {
+    }
+
+    interface IFoo<T>
+        where T : IService
+    {
+    }
+
+    class Second<T> : IFoo<T>
+        where T : IService
+    {
+    }
+
+    public interface IHuman
+    {
+    }
+
+    public class HumanImpl : IHuman
+    {
+    }
+}
+
+interface ISmth
     {
     }
 
@@ -82,5 +110,3 @@ namespace Tests
     }
 
 
-
-}
