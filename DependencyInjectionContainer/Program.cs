@@ -72,8 +72,10 @@ namespace DependencyInjectionContainer
         public IB b { get; set; }
         public A(IB ib, int val)
         {
-            valll = val;
+        Random r = new Random();
+            valll = r.Next(0,100);
             this.b = ib;
-            Console.WriteLine("A constructor: gets " + ib.ToString());
+       //     Console.WriteLine("A constructor: gets " + ib.ToString());
         }
     }
+

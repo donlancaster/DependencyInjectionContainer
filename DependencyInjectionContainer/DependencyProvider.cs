@@ -19,11 +19,16 @@ namespace DependencyInjectionContainer
 
         private readonly Stack<Type> _recursionStackResolver = new Stack<Type>();
 
-        public Dictionary<Type, object> mockedWType = new Dictionary<Type, object>();
 
+
+
+        //словарь тип-объект моков
+        public Dictionary<Type, object> mockedObjects = new Dictionary<Type, object>();
+        //название типа, объект. Содержит те объекты, которые прошли resolve
         public Dictionary<String, object> resolvedDictionary = new Dictionary<String, object>();
+        //список существующих типов (для разрешения моков)
+        public List<Type> existingTypes = new List<Type>();
 
-        public List<object> resolvedList = new List<object>();
 
         public DependencyProvider(DependenciesConfiguration configuration)
         {
@@ -36,7 +41,8 @@ namespace DependencyInjectionContainer
             Type resolvedType = null;
             if (resolved == null)
                 return default(TDependency);
-                resolvedType = resolved.GetType();
+            resolvedType = resolved.GetType();
+            var interfaces = resolved.GetType().GetInterfaces();
             PropertyInfo[] propertyInfos = resolved.GetType().GetProperties();
             Console.WriteLine("current object: " + resolved); ;
             for (int i = 0; i < propertyInfos.Length; i++)
@@ -45,18 +51,23 @@ namespace DependencyInjectionContainer
                 //                Console.WriteLine("value = " + propertyInfos[i].GetValue(resolved));
             }
             Console.WriteLine();
-            if (mockedWType.Count != 0 && resolvedDictionary.Count != 0)
+
+            if (mockedObjects.Count != 0 && resolvedDictionary.Count != 0)
             {
+
                 for (int i = 0; i < propertyInfos.Length; i++)
                 {
                     if (propertyInfos[i].GetValue(resolved).ToString().StartsWith("Mock"))
                     {
+                        //Fist : SecondInterface, SecondClass
+
+
                         String tmp = propertyInfos[i].PropertyType.ToString();
-                        if (resolvedDictionary.ContainsKey(tmp.Substring(1)))
+                        if (resolvedDictionary.ContainsKey(tmp))
                         {
                             Console.WriteLine("Before resolving mock in class " + resolved.ToString() + ": " + propertyInfos[i].PropertyType.ToString() + " " + propertyInfos[i].Name + " = " + propertyInfos[i].GetValue(resolved).ToString());
 
-                            propertyInfos[i].SetValue(resolved, resolvedDictionary[propertyInfos[i].PropertyType.ToString().Substring(1)]);
+                            propertyInfos[i].SetValue(resolved, resolvedDictionary[propertyInfos[i].PropertyType.ToString()]);
 
                             Console.WriteLine("After resolving mock in class  " + resolved.ToString() + ": " + propertyInfos[i].PropertyType.ToString() + " " + propertyInfos[i].Name + " = " + propertyInfos[i].GetValue(resolved).ToString());
                         }
@@ -65,13 +76,15 @@ namespace DependencyInjectionContainer
             }
             try
             {
-                resolvedDictionary.Add(resolvedType.ToString(), resolved);
+                //resolvedDictionary.Add(resolvedType.ToString(), resolved);
+                resolvedDictionary.Add(interfaces[0].ToString(), resolved);
+
             }
             catch
             {
 
             }
-            resolvedList.Add(resolved);
+
             Console.WriteLine("\nresolved " + resolved.ToString() + "\n");
             return resolved;
         }
@@ -89,6 +102,9 @@ namespace DependencyInjectionContainer
                 return null;
             }
 
+            if (!existingTypes.Contains(t))
+                existingTypes.Add(t);
+
             _recursionStackResolver.Push(t);
 
             if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
@@ -105,6 +121,7 @@ namespace DependencyInjectionContainer
                 return ConvertToIEnumerable(implementations, dependencyType);
             }
             object obj = GetImplementation(infos[0], t);
+
             _recursionStackResolver.Pop();
             return obj;
         }
@@ -165,19 +182,19 @@ namespace DependencyInjectionContainer
                 {
                     if (IsDependency(parameter.ParameterType))
                     {
-                        //нашел А
+                        //iSecond
                         object obj = Resolve(parameter.ParameterType);
-                        if (obj == null && ((parameter.ParameterType.Name.Equals("IA") || (parameter.ParameterType.Name.Equals("IB")))))
+
+
+                        Type parameterType = parameter.ParameterType;
+
+                        if (obj == null && existingTypes.Contains(parameterType))
                         {
                             Mock mock;
-                            if (parameter.ParameterType.Name.Equals("IA"))
-                                mock = new Mock<IA>();
-                            else mock = new Mock<IB>();
+                            var type = typeof(Mock<>).MakeGenericType(parameterType);
+                            mock = (Mock)Activator.CreateInstance(type);
                             obj = mock.Object;
-                            this.hasMock = true;
-                            // mockedDictionary.Add(implInstance, obj);
-                            //mocked.Add(obj);
-                            mockedWType.Add(parameter.ParameterType, obj);
+                            mockedObjects.Add(parameter.ParameterType, obj);
                         }
                         paramsValues.Add(obj);
                     }
@@ -190,9 +207,8 @@ namespace DependencyInjectionContainer
                         }
                         catch
                         {
-                           
-                        }
 
+                        }
                         paramsValues.Add(obj);
                     }
                 }

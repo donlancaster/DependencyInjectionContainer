@@ -48,7 +48,6 @@ namespace Tests
             configuration.Register<IService, FirstIServiceImpl>();
             configuration.Register<IService, SecondIServiceImpl>();
             DependencyProvider provider = new DependencyProvider(configuration);
-
             IEnumerable<IService> impls = provider.Resolve<IEnumerable<IService>>();
             Assert.IsNotNull(impls);
             Assert.AreEqual(2, ((List<IService>)impls).Count);
@@ -82,7 +81,7 @@ namespace Tests
             DependencyProvider provider = new DependencyProvider(configuration);
 
             FirstIClientImpl client = (FirstIClientImpl)provider.Resolve<IClient>();
-            Assert.IsNull(((IDataImpl)client.Data).Cl);
+            Assert.IsNotNull(((IDataImpl)client.Data).Cl);
         }
 
 
@@ -101,11 +100,6 @@ namespace Tests
             Assert.IsNotNull(cl2);
         }
 
-
-
-
-
-
         [TestMethod]
         public void SameClassTest()
         {
@@ -117,24 +111,39 @@ namespace Tests
         }
 
 
-
-
         [TestMethod]
-        public void AtoBtoATest()
+        public void TwoSingletonParametersDependencies()
         {
             var config = new DependenciesConfiguration();
             config.Register<IA, A>(LifeTime.Singleton);
             config.Register<IB, B>(LifeTime.Singleton);
             DependencyProvider provider = new DependencyProvider(config);
             B b = (B)provider.Resolve<IB>();
-            Assert.IsNotNull(b);
-            PropertyInfo[] propertyInfos = b.a.GetType().GetProperties();
-            Assert.IsTrue(propertyInfos[0].GetValue(b.a).ToString().Contains("Mock"), b.a.ToString());
-            b.a = (A)provider.Resolve<IA>();
-            Assert.IsNotNull(b.a, b.GetType() + " " + b.a.GetType());
-            propertyInfos = b.a.GetType().GetProperties();
-            Assert.IsFalse(propertyInfos[0].GetValue(b.a).ToString().Contains("Mock"));
+            A a = (A)provider.Resolve<IA>();
+            Assert.AreEqual(b.a, a);
+            Assert.AreEqual(b, a.b);
+            A a1 = (A)b.a;
+            Assert.AreEqual(a1.b, b);
+        }
 
+
+
+        [TestMethod]
+        public void ThreeSingletonParametersDependencies()
+        {
+            var config = new DependenciesConfiguration();
+            config.Register<FirstInterface, FirstClass>(LifeTime.Singleton);
+            config.Register<SecondInterface, SecondClass>(LifeTime.Singleton);
+            config.Register<ThirdInterface, ThirdClass>(LifeTime.Singleton);
+            DependencyProvider provider = new DependencyProvider(config);
+            FirstClass first = (FirstClass)provider.Resolve<FirstInterface>();
+            SecondClass second = (SecondClass)provider.Resolve<SecondInterface>();
+            ThirdClass third = (ThirdClass)provider.Resolve<ThirdInterface>();
+            ThirdClass thirdTmp = (ThirdClass)second.third;
+            Assert.AreEqual(first.second, second);
+            Assert.AreEqual(second.third, third);
+            Assert.AreEqual(third.first,first);
+            Assert.AreEqual(thirdTmp.first, first);
         }
     }
 

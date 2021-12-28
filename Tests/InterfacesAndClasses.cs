@@ -35,78 +35,107 @@ where T : ISmth
     }
 }
 
-interface ISmth
+public interface ISmth
+{
+}
+
+class ISmthImpl : ISmth
+{
+}
+
+
+public interface IService
+{
+}
+
+public class FirstIServiceImpl : IService
+{
+    public ISmth Smth { get; set; }
+
+    public FirstIServiceImpl()
     {
     }
 
-    class ISmthImpl : ISmth
+    public FirstIServiceImpl(ISmth smth)
     {
+        Smth = smth;
     }
+}
+
+public class SecondIServiceImpl : IService
+{
+}
 
 
-    interface IService
+
+public interface IData
+{
+}
+
+ public class IDataImpl : IData
+{
+    public IClient Cl { get; set; }
+
+    public IDataImpl(IClient cl)
     {
+        Cl = cl;
     }
+}
 
-    class FirstIServiceImpl : IService
+
+
+public interface IClient
+{
+}
+
+class FirstIClientImpl : IClient
+{
+    public IData Data { get; set; }
+
+    public FirstIClientImpl(IData data)
     {
-        public readonly ISmth Smth;
-
-        public FirstIServiceImpl()
-        {
-        }
-
-        public FirstIServiceImpl(ISmth smth)
-        {
-            Smth = smth;
-        }
+        Data = data;
     }
+}
 
-    class SecondIServiceImpl : IService
+
+class SecondIClientImpl : IClient
+{
+    public IEnumerable<IService> Serv { get; set; }
+
+    public SecondIClientImpl(IEnumerable<IService> serv)
     {
+        Serv = serv;
     }
+}
 
 
-
-    interface IData
+public interface FirstInterface { }
+public class FirstClass : FirstInterface
+{
+    public SecondInterface second { get; set; }
+    public FirstClass(SecondInterface iSecond)
     {
+        this.second = iSecond;
     }
+}
 
-    class IDataImpl : IData
+public interface SecondInterface { }
+public class SecondClass : SecondInterface
+{
+    public ThirdInterface third { get; set; }
+    public SecondClass(ThirdInterface iThird)
     {
-        public readonly IClient Cl;
-
-        public IDataImpl(IClient cl)
-        {
-            Cl = cl;
-        }
+        this.third = iThird;
     }
+}
 
-
-
-    interface IClient
+public interface ThirdInterface { }
+public class ThirdClass : ThirdInterface
+{
+    public FirstInterface first { get; set; }
+    public ThirdClass(FirstInterface iFirst)
     {
+        this.first = iFirst;
     }
-
-    class FirstIClientImpl : IClient
-    {
-        public readonly IData Data;
-
-        public FirstIClientImpl(IData data)
-        {
-            Data = data;
-        }
-    }
-
-
-    class SecondIClientImpl : IClient
-    {
-        public readonly IEnumerable<IService> Serv;
-
-        public SecondIClientImpl(IEnumerable<IService> serv)
-        {
-            Serv = serv;
-        }
-    }
-
-
+}

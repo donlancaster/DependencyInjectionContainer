@@ -29,7 +29,7 @@ namespace DependencyInjectionContainer
         public void Register(Type interfaceType, Type classType, LifeTime lifeTime = LifeTime.InstancePerDependency)
         {
             if ((!interfaceType.IsInterface && interfaceType != classType) || classType.IsAbstract || !interfaceType.IsAssignableFrom(classType) && !interfaceType.IsGenericTypeDefinition)
-                throw new Exception("oshibka d9db");
+                throw new Exception("oshibka");
 
 
             if (!RegisteredDependencies.ContainsKey(interfaceType))
